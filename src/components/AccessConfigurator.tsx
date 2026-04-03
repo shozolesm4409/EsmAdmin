@@ -17,12 +17,20 @@ export function AccessConfigurator({ value, onChange }: AccessConfiguratorProps)
     return val.split(/,(?=(?:(?:[^']*'){2})*[^']*$)/).map(s => s.trim()).filter(Boolean);
   };
 
-  const handleModuleToggle = (module: string, checked: boolean) => {
+  const handleModuleToggle = (module: string, checked: boolean, isView: boolean = false) => {
     let currentModules = parseModules(value);
     
     if (checked) {
+      let moduleString = module;
+      if (isView) {
+        moduleString = `${module}'View'`;
+      }
       if (!currentModules.some(m => m.startsWith(module))) {
-        currentModules.push(module);
+        currentModules.push(moduleString);
+      } else {
+        // Update if already exists to add/remove View
+        const index = currentModules.findIndex(m => m.startsWith(module));
+        currentModules[index] = moduleString;
       }
     } else {
       currentModules = currentModules.filter(m => !m.startsWith(module));
@@ -36,10 +44,11 @@ export function AccessConfigurator({ value, onChange }: AccessConfiguratorProps)
     const index = currentModules.findIndex(m => m.startsWith(module));
     
     if (index !== -1) {
+      const isView = currentModules[index].includes("'View'");
       if (subjects) {
-        currentModules[index] = `${module}'${subjects}'`;
+        currentModules[index] = `${module}'${subjects}'${isView ? "'View'" : ''}`;
       } else {
-        currentModules[index] = module;
+        currentModules[index] = `${module}${isView ? "'View'" : ''}`;
       }
       onChange(currentModules.join(', '));
     }
@@ -48,10 +57,11 @@ export function AccessConfigurator({ value, onChange }: AccessConfiguratorProps)
   const getModuleState = (module: string) => {
     const currentModules = parseModules(value);
     const found = currentModules.find(m => m.startsWith(module));
-    if (!found) return { checked: false, subjects: '' };
+    if (!found) return { checked: false, subjects: '', isView: false };
     
     const match = found.match(/'([^']+)'/);
-    return { checked: true, subjects: match ? match[1] : '' };
+    const isView = found.includes("'View'");
+    return { checked: true, subjects: match && match[1] !== 'View' ? match[1] : '', isView };
   };
 
   return (
@@ -94,15 +104,26 @@ export function AccessConfigurator({ value, onChange }: AccessConfiguratorProps)
                     />
                     <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{module}</span>
                   </label>
-                  {state.checked && hasSubjects && (
-                    <div className="ml-6">
-                      <input 
-                        type="text"
-                        value={state.subjects}
-                        onChange={(e) => handleSubjectChange(module, e.target.value)}
-                        placeholder="Subjects (e.g. বাংলা, গণিত)"
-                        className="w-full text-xs px-2 py-1.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                      />
+                  {state.checked && (
+                    <div className="ml-6 space-y-1.5">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={state.isView}
+                          onChange={(e) => handleModuleToggle(module, e.target.checked, true)}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3 h-3 cursor-pointer"
+                        />
+                        <span className="text-xs text-slate-600">View</span>
+                      </label>
+                      {hasSubjects && (
+                        <input 
+                          type="text"
+                          value={state.subjects}
+                          onChange={(e) => handleSubjectChange(module, e.target.value)}
+                          placeholder="Subjects (e.g. বাংলা, গণিত)"
+                          className="w-full text-xs px-2 py-1.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        />
+                      )}
                     </div>
                   )}
                 </div>
