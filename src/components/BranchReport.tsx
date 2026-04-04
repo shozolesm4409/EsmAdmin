@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { BarChart3, Building2, TrendingUp, Users as UsersIcon, GraduationCap } from 'lucide-react';
+import { BarChart3, Building2, TrendingUp, Users as UsersIcon, GraduationCap, Eye } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { DetailsPopup } from './DetailsPopup';
 
 interface BranchReportProps {
   users: User[];
@@ -9,6 +10,7 @@ interface BranchReportProps {
 
 export function BranchReport({ users }: BranchReportProps) {
   const [activeTab, setActiveTab] = useState<'All' | 'Updated'>('All');
+  const [selectedDetails, setSelectedDetails] = useState<{ title: string; data: any } | null>(null);
 
   const filteredUsers = activeTab === 'All' 
     ? users 
@@ -29,12 +31,14 @@ export function BranchReport({ users }: BranchReportProps) {
         totalEV: 0,
         recordCount: 0,
         subjects: new Set<string>(),
-        teachers: new Set<string>()
+        teachers: new Set<string>(),
+        users: []
       };
     }
     acc[branchId].totalBV += (user.bvCount || 0);
     acc[branchId].totalEV += (user.evCount || 0);
     acc[branchId].recordCount += 1;
+    acc[branchId].users.push(user);
     if (user.subject) acc[branchId].subjects.add(user.subject);
     if (user.teacherName) acc[branchId].teachers.add(user.teacherName);
     return acc;
@@ -55,12 +59,14 @@ export function BranchReport({ users }: BranchReportProps) {
         totalEV: 0,
         recordCount: 0,
         branches: new Set<string>(),
-        subjects: new Set<string>()
+        subjects: new Set<string>(),
+        users: []
       };
     }
     acc[key].totalBV += (user.bvCount || 0);
     acc[key].totalEV += (user.evCount || 0);
     acc[key].recordCount += 1;
+    acc[key].users.push(user);
     if (user.branchName) acc[key].branches.add(user.branchName);
     if (user.subject) acc[key].subjects.add(user.subject);
     return acc;
@@ -138,6 +144,7 @@ export function BranchReport({ users }: BranchReportProps) {
                   <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total BV</th>
                   <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total EV</th>
                   <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total</th>
+                  <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -174,11 +181,19 @@ export function BranchReport({ users }: BranchReportProps) {
                     <td className="p-2 text-right">
                       <span className="text-sm font-bold text-purple-600">{branch.totalBV + branch.totalEV}</span>
                     </td>
+                    <td className="p-2 text-center">
+                      <button 
+                        onClick={() => setSelectedDetails({ title: `Branch: ${branch.branchName}`, data: { ...branch, subjects: Array.from(branch.subjects), teachers: Array.from(branch.teachers), users: branch.users } })}
+                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {branchList.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="p-2 py-12 text-center text-slate-500 italic">No branch data available.</td>
+                    <td colSpan={8} className="p-2 py-12 text-center text-slate-500 italic">No branch data available.</td>
                   </tr>
                 )}
               </tbody>
@@ -205,6 +220,7 @@ export function BranchReport({ users }: BranchReportProps) {
                   <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total BV</th>
                   <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total EV</th>
                   <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Total</th>
+                  <th className="p-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -241,11 +257,19 @@ export function BranchReport({ users }: BranchReportProps) {
                     <td className="p-2 text-right">
                       <span className="text-sm font-bold text-purple-600">{teacher.totalBV + teacher.totalEV}</span>
                     </td>
+                    <td className="p-2 text-center">
+                      <button 
+                        onClick={() => setSelectedDetails({ title: `Teacher: ${teacher.teacherName}`, data: { ...teacher, subjects: Array.from(teacher.subjects), branches: Array.from(teacher.branches), users: teacher.users } })}
+                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {teacherList.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="p-2 py-12 text-center text-slate-500 italic">No teacher data available.</td>
+                    <td colSpan={8} className="p-2 py-12 text-center text-slate-500 italic">No teacher data available.</td>
                   </tr>
                 )}
               </tbody>
@@ -253,6 +277,12 @@ export function BranchReport({ users }: BranchReportProps) {
           </div>
         </div>
       </div>
+      <DetailsPopup 
+        isOpen={!!selectedDetails} 
+        onClose={() => setSelectedDetails(null)} 
+        title={selectedDetails?.title || ''}
+        data={selectedDetails?.data || {}}
+      />
     </div>
   );
 }

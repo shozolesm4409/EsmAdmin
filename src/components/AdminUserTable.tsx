@@ -8,9 +8,10 @@ interface AdminUserTableProps {
   onAdd: () => void;
   onToggleStatus: (rowId: number, currentStatus: 'Active' | 'Blocked') => void;
   onUpdateAccess: (rowId: number, role: string, access: string, userName: string) => void;
+  onViewDetails: (user: AdminUserRecord) => void;
 }
 
-export function AdminUserTable({ users, onAdd, onToggleStatus, onUpdateAccess }: AdminUserTableProps) {
+export function AdminUserTable({ users, onAdd, onToggleStatus, onUpdateAccess, onViewDetails }: AdminUserTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingAccess, setEditingAccess] = useState<AdminUserRecord | null>(null);
   const [newRole, setNewRole] = useState('');
@@ -92,10 +93,8 @@ export function AdminUserTable({ users, onAdd, onToggleStatus, onUpdateAccess }:
                 <td className="px-6 py-1 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button 
-                      onClick={() => {
-                        // TODO: Implement view details for Admin User
-                      }}
-                      className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                      onClick={() => onViewDetails(user)}
+                      className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                       title="View Details"
                     >
                       <Eye size={16} />
@@ -107,14 +106,14 @@ export function AdminUserTable({ users, onAdd, onToggleStatus, onUpdateAccess }:
                         setNewAccess(user.accessSidebar);
                         setNewName(user.userName);
                       }}
-                      className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                       title="Edit Role & Access"
                     >
                       <Settings size={16} />
                     </button>
                     <button 
                       onClick={() => onToggleStatus(user.rowId, user.status)}
-                      className={`p-1 rounded-lg transition-colors ${
+                      className={`p-1 rounded-lg transition-colors cursor-pointer ${
                         user.status === 'Active' 
                           ? 'text-red-500 hover:bg-red-50' 
                           : 'text-emerald-500 hover:bg-emerald-50'

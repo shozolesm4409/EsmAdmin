@@ -163,15 +163,15 @@ export function UserTable({ users, onEdit, onDelete, onAdd, onViewDetails, readO
                 <td className="p-2 text-sm text-slate-500">{formatDate(user.entryDate)}</td>
                 <td className="p-2 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button onClick={() => onViewDetails(user)} className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Marks">
+                    <button onClick={() => onViewDetails(user)} className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer" title="View Marks">
                       <Eye size={14} />
                     </button>
                     {!readOnly && (
                       <>
-                        <button onClick={() => onEdit(user)} className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <button onClick={() => onEdit(user)} className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                           <Edit2 size={14} />
                         </button>
-                        <button onClick={() => onDelete(user.rowId)} className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <button onClick={() => onDelete(user.rowId)} className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
                           <Trash2 size={14} />
                         </button>
                       </>

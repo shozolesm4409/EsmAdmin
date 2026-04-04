@@ -83,49 +83,47 @@ export function AccessConfigurator({ value, onChange }: AccessConfiguratorProps)
       </button>
 
       {showConfig && (
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 max-h-[40vh] overflow-y-auto">
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
           <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-200">
              <button type="button" onClick={() => onChange('Full')} className="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-200 transition-colors cursor-pointer">Set Full Access</button>
              <button type="button" onClick={() => onChange('')} className="text-xs bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-300 transition-colors cursor-pointer">Clear All</button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {MODULES.map(module => {
               const state = getModuleState(module);
               const hasSubjects = module === 'MarkSheet' || module === 'PaymentSheet';
               
               return (
                 <div key={module} className="flex flex-col gap-1.5">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={state.checked}
-                      onChange={(e) => handleModuleToggle(module, e.target.checked)}
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
-                    />
-                    <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{module}</span>
-                  </label>
-                  {state.checked && (
-                    <div className="ml-6 space-y-1.5">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          checked={state.isView}
-                          onChange={(e) => handleModuleToggle(module, e.target.checked, true)}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3 h-3 cursor-pointer"
-                        />
-                        <span className="text-xs text-slate-600">View</span>
-                      </label>
-                      {hasSubjects && (
-                        <input 
-                          type="text"
-                          value={state.subjects}
-                          onChange={(e) => handleSubjectChange(module, e.target.value)}
-                          placeholder="Subjects (e.g. বাংলা, গণিত)"
-                          className="w-full text-xs px-2 py-1.5 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        />
-                      )}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer group w-32">
+                      <input 
+                        type="checkbox" 
+                        checked={state.checked}
+                        onChange={(e) => handleModuleToggle(module, e.target.checked)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                      />
+                      <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900">{module}</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={state.isView}
+                        onChange={(e) => handleModuleToggle(module, e.target.checked, true)}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                      />
+                      <span className="text-sm text-slate-600">View</span>
+                    </label>
+                    {hasSubjects && (
+                      <input 
+                        type="text"
+                        value={state.subjects}
+                        onChange={(e) => handleSubjectChange(module, e.target.value)}
+                        placeholder="Subjects (e.g. বাংলা, গণিত)"
+                        className="text-sm px-2 py-1 bg-white border border-slate-200 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-48"
+                      />
+                    )}
+                  </div>
                 </div>
               );
             })}

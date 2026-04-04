@@ -1,7 +1,7 @@
 import { User, UserFormData, AdminUser, AdminUserRecord, Branch, Examiner } from '../types';
 
 // @ts-ignore
-const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbxEz2sZYfm-QCnSqwR7u4PazMFA1uZytOMQRGA0Ue2f-dphpzJKI-MNedUCCTnCM5wBSg/exec";
+const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbyhy3fRd8FjD30VB0HZKleJlpLnjBvTjGxidnAvWyHCaX7OCsA5Arwm1s2iUgjRL2QkBA/exec";
 
 const MOCK_DATA: User[] = [
   { 
@@ -56,6 +56,7 @@ export const apiService = {
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       });
       const data = await response.json();
+      console.log('Users Data:', data);
       if (data.status === 'success') return data.data;
       throw new Error(data.message || 'Failed to fetch data');
     } catch (error: any) {
@@ -123,6 +124,7 @@ export const apiService = {
       headers: { 'Content-Type': 'text/plain;charset=utf-8' }
     });
     const data = await response.json();
+    console.log('Admin Users Data:', data);
     return data.data;
   },
 

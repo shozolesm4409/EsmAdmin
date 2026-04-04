@@ -6,6 +6,7 @@ import { AdminUserTable } from './components/AdminUserTable';
 import { BranchReport } from './components/BranchReport';
 import { Modal } from './components/Modal';
 import { UserDetailsPage } from './components/UserDetailsPage';
+import { AdminUserDetailsPage } from './components/AdminUserDetailsPage';
 import { UserForm } from './components/UserForm';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { DetailsModal } from './components/DetailsModal';
@@ -41,6 +42,7 @@ export default function App() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
+  const [viewingAdminUser, setViewingAdminUser] = useState<AdminUserRecord | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
 
   // Admin User Form State
@@ -175,7 +177,7 @@ export default function App() {
     }
   };
 
-  const handleUpdateProfileName = async (newName: string) => {
+  const handleUpdateProfile = async (newName: string, profileImage?: string) => {
     if (!admin) return;
     const currentAdminRecord = adminUsers.find(u => u.userId === admin.id);
     if (!currentAdminRecord) return;
@@ -185,7 +187,8 @@ export default function App() {
         currentAdminRecord.rowId, 
         currentAdminRecord.role, 
         currentAdminRecord.accessSidebar, 
-        newName
+        newName,
+        profileImage
       );
       
       const updatedAdmin = { ...admin, name: newName };
@@ -312,6 +315,13 @@ export default function App() {
                     onUpdateSuccess={fetchData}
                   />
                 )}
+                {currentView === 'adminUserDetails' && viewingAdminUser && (
+                  <AdminUserDetailsPage 
+                    user={viewingAdminUser} 
+                    admin={admin}
+                    onBack={() => setCurrentView('users')}
+                  />
+                )}
                 {currentView === 'dashboard' && (
                   <UserTable 
                     users={users} 
@@ -342,6 +352,7 @@ export default function App() {
                     onAdd={() => setIsAdminFormModalOpen(true)}
                     onToggleStatus={handleToggleAdminStatus}
                     onUpdateAccess={handleUpdateAdminAccess}
+                    onViewDetails={(u) => { setViewingAdminUser(u); setCurrentView('adminUserDetails'); }}
                   />
                 )}
                 {currentView === 'profile' && admin && (
@@ -354,7 +365,7 @@ export default function App() {
                       role: admin.role,
                       accessSidebar: admin.accessSidebar
                     }} 
-                    onUpdateName={handleUpdateProfileName} 
+                    onUpdateProfile={handleUpdateProfile} 
                   />
                 )}
                 {currentView === 'settings' && (

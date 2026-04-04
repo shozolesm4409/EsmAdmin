@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { Search, Wallet, Loader2 } from 'lucide-react';
+import { Search, Wallet, Loader2, Eye } from 'lucide-react';
+import { DetailsPopup } from './DetailsPopup';
 
 interface PaymentSheetProps {
   users: User[];
@@ -31,6 +32,7 @@ export function PaymentSheet({ users, onStatusUpdate, adminAccess = '' }: Paymen
   const [activeStatus, setActiveStatus] = useState('Pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
 
   const statusCounts = React.useMemo(() => {
     const counts = { Pending: 0, Update: 0 };
@@ -97,20 +99,23 @@ export function PaymentSheet({ users, onStatusUpdate, adminAccess = '' }: Paymen
     )
   );
 
-  const handleStatusChange = async (branch: any, group: any, newStatus: string) => {
+  const handleStatusChange = async (group: any, newStatus: string) => {
     if (newStatus === 'Update') {
-      const branchKey = `${group.key}-${branch.branchName}`;
-      setIsUpdating(branchKey);
+      setIsUpdating(group.key);
       try {
+        // Collect all rowIds from all branches
+        const allRowIds = group.branches.flatMap((b: any) => b.rowIds);
+        
+        // Aggregate data for the update
         const aggregateData = {
           teacherName: group.teacherName,
           teacherTPIN: group.teacherTPIN,
-          branchName: branch.branchName,
-          bvCount: branch.bvCount,
-          evCount: branch.evCount,
+          branchName: 'All Branches',
+          bvCount: group.branches.reduce((sum: number, b: any) => sum + b.bvCount, 0),
+          evCount: group.branches.reduce((sum: number, b: any) => sum + b.evCount, 0),
           status: newStatus
         };
-        await onStatusUpdate(branch.rowIds, newStatus, aggregateData);
+        await onStatusUpdate(allRowIds, newStatus, aggregateData);
       } finally {
         setIsUpdating(null);
       }
@@ -197,33 +202,45 @@ export function PaymentSheet({ users, onStatusUpdate, adminAccess = '' }: Paymen
                     const branchKey = `${group.key}-${branch.branchName}`;
                     return (
                       <tr key={branchKey} className="hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-b-0">
-                        <td className="px-6 py-1 text-sm text-slate-600">
-                          {bIdx === 0 ? group.teacherName : ""}
-                        </td>
-                        <td className="px-6 py-1 text-sm font-mono text-slate-500">
-                          {bIdx === 0 ? group.teacherTPIN : ""}
-                        </td>
+                        {bIdx === 0 && (
+                          <>
+                            <td className="px-6 py-1 text-sm text-slate-600 border-r border-slate-100" rowSpan={group.branches.length}>
+                              {group.teacherName}
+                            </td>
+                            <td className="px-6 py-1 text-sm font-mono text-slate-500 border-r border-slate-100" rowSpan={group.branches.length}>
+                              {group.teacherTPIN}
+                            </td>
+                          </>
+                        )}
                         <td className="px-6 py-1 text-sm font-bold text-slate-900">{branch.branchName}</td>
                         <td className="px-6 py-1 text-sm font-bold text-blue-600">{branch.bvCount}</td>
                         <td className="px-6 py-1 text-sm font-bold text-emerald-600">{branch.evCount}</td>
-                        <td className="px-6 py-1">
-                          <div className="flex items-center gap-2">
-                            <select 
-                              value={branch.status} 
-                              onChange={(e) => handleStatusChange(branch, group, e.target.value)}
-                              disabled={isUpdating === branchKey || branch.status === 'Update'}
-                              className={`text-[10px] font-bold px-2 py-1 rounded-lg border-none outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer shadow-sm ${
-                                branch.status === 'Update' 
-                                  ? 'bg-emerald-500 text-white cursor-default' 
-                                  : 'bg-amber-500 text-white hover:bg-amber-600'
-                              }`}
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Update">Update</option>
-                            </select>
-                            {isUpdating === branchKey && <Loader2 size={12} className="animate-spin text-blue-600" />}
-                          </div>
-                        </td>
+                        {bIdx === 0 && (
+                          <td className="px-6 py-1" rowSpan={group.branches.length}>
+                            <div className="flex items-center gap-2">
+                              <button 
+                                onClick={() => setSelectedGroup(group)}
+                                className="p-1 hover:bg-slate-200 rounded-lg transition-colors text-slate-400 hover:text-slate-600"
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <select 
+                                value={group.branches.every((b: any) => b.status === 'Update') ? 'Update' : 'Pending'} 
+                                onChange={(e) => handleStatusChange(group, e.target.value)}
+                                disabled={isUpdating === group.key || group.branches.every((b: any) => b.status === 'Update')}
+                                className={`text-[10px] font-bold px-2 py-1 rounded-lg border-none outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer shadow-sm ${
+                                  group.branches.every((b: any) => b.status === 'Update')
+                                    ? 'bg-emerald-500 text-white cursor-default' 
+                                    : 'bg-amber-500 text-white hover:bg-amber-600'
+                                }`}
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Update">Update</option>
+                              </select>
+                              {isUpdating === group.key && <Loader2 size={12} className="animate-spin text-blue-600" />}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -240,6 +257,26 @@ export function PaymentSheet({ users, onStatusUpdate, adminAccess = '' }: Paymen
           </table>
         </div>
       </div>
+      {selectedGroup && (
+        <DetailsPopup 
+          isOpen={!!selectedGroup} 
+          onClose={() => setSelectedGroup(null)}
+          title={`Details for ${selectedGroup.teacherName}`}
+          data={{
+            teacherName: selectedGroup.teacherName,
+            teacherTPIN: selectedGroup.teacherTPIN,
+            users: selectedGroup.branches.flatMap((b: any) => b.rowIds.map((id: number) => {
+              const user = users.find(u => u.rowId === id);
+              return {
+                teacherName: user?.teacherName,
+                subject: user?.subject,
+                bvCount: user?.bvCount,
+                evCount: user?.evCount
+              };
+            }))
+          }}
+        />
+      )}
     </div>
   );
 }

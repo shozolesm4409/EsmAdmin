@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Branch, Examiner } from '../types';
 import { apiService } from '../services/api';
-import { Building2, GraduationCap, Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Building2, GraduationCap, Plus, Edit2, Trash2, Loader2, Eye } from 'lucide-react';
 import { Modal } from './Modal';
 import { ConfirmDialog } from './ConfirmDialog';
+import { DetailsPopup } from './DetailsPopup';
 
 interface SettingsProps {
   onNotify: (type: 'success' | 'error', message: string) => void;
@@ -19,6 +20,10 @@ export function Settings({ onNotify }: SettingsProps) {
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [branchForm, setBranchForm] = useState<Branch>({ branchName: '', pin: '', branchId: '', coordinatorName: '' });
+
+  // Details Popup State
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
 
   // Examiner Modal State
   const [isExaminerModalOpen, setIsExaminerModalOpen] = useState(false);
@@ -99,6 +104,11 @@ export function Settings({ onNotify }: SettingsProps) {
     setEditingBranch(branch);
     setBranchForm({ ...branch });
     setIsBranchModalOpen(true);
+  };
+
+  const openDetails = (branch: Branch) => {
+    setSelectedBranch(branch);
+    setIsDetailsOpen(true);
   };
 
   const openAddExaminer = () => {
@@ -187,6 +197,9 @@ export function Settings({ onNotify }: SettingsProps) {
                       <td className="p-1.5 text-slate-600">{branch.coordinatorName}</td>
                       <td className="p-1.5">
                         <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => openDetails(branch)} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer">
+                            <Eye size={16} />
+                          </button>
                           <button onClick={() => openEditBranch(branch)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                             <Edit2 size={16} />
                           </button>
@@ -307,6 +320,15 @@ export function Settings({ onNotify }: SettingsProps) {
         confirmText="Delete" 
         isDestructive 
       />
+      
+      {selectedBranch && (
+        <DetailsPopup
+          isOpen={isDetailsOpen}
+          onClose={() => setIsDetailsOpen(false)}
+          title={`Branch Details: ${selectedBranch.branchName}`}
+          data={selectedBranch as any}
+        />
+      )}
     </div>
   );
 }
