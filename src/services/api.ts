@@ -1,7 +1,7 @@
 import { User, UserFormData, AdminUser, AdminUserRecord, Branch, Examiner } from '../types';
 
 // @ts-ignore
-const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbwyBzkJqK4gQYwOX7iArySrZNNvpz7hnZrLj2REq2KaZIHrTlT_jvLK0pUMU6a3HAc5/exec";
+const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbxEz2sZYfm-QCnSqwR7u4PazMFA1uZytOMQRGA0Ue2f-dphpzJKI-MNedUCCTnCM5wBSg/exec";
 
 const MOCK_DATA: User[] = [
   { 
