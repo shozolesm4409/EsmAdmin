@@ -5,6 +5,7 @@ import { UserTable } from './components/UserTable';
 import { AdminUserTable } from './components/AdminUserTable';
 import { BranchReport } from './components/BranchReport';
 import { Modal } from './components/Modal';
+import { UserDetailsPage } from './components/UserDetailsPage';
 import { UserForm } from './components/UserForm';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { DetailsModal } from './components/DetailsModal';
@@ -261,6 +262,8 @@ export default function App() {
           onMenuClick={() => setIsSidebarOpen(true)} 
           userName={admin?.name || 'Admin'} 
           userRole={admin?.role || 'User'} 
+          onViewChange={setCurrentView}
+          onLogout={handleLogout}
         />
         
         <div className="p-4 lg:p-8 pt-4 lg:pt-4 flex-1">
@@ -301,13 +304,21 @@ export default function App() {
               </div>
             ) : (
               <>
+                {currentView === 'userDetails' && viewingUser && (
+                  <UserDetailsPage 
+                    user={viewingUser} 
+                    admin={admin}
+                    onBack={() => setCurrentView('dashboard')}
+                    onUpdateSuccess={fetchData}
+                  />
+                )}
                 {currentView === 'dashboard' && (
                   <UserTable 
                     users={users} 
                     onEdit={(u) => { setEditingUser(u); setIsFormModalOpen(true); }} 
                     onDelete={(id) => { setDeletingUserId(id); setIsConfirmOpen(true); }}
                     onAdd={() => { setEditingUser(null); setIsFormModalOpen(true); }}
-                    onViewDetails={(u) => { setViewingUser(u); setIsDetailsOpen(true); }}
+                    onViewDetails={(u) => { setViewingUser(u); setCurrentView('userDetails'); }}
                     readOnly={admin.accessSidebar.includes("Dashboard'View'")}
                   />
                 )}

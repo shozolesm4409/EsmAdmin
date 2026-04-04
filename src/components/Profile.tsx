@@ -1,21 +1,42 @@
-import React, { useState } from 'react';
-import { UserCircle, Save, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { UserCircle, Save, Loader2, Camera, Upload } from 'lucide-react';
 import { AdminUserRecord } from '../types';
+import { apiService } from '../services/api';
 
 interface ProfileProps {
   admin: AdminUserRecord;
-  onUpdateName: (newName: string) => Promise<void>;
+  onUpdateProfile: (newName: string, profileImage?: string) => Promise<void>;
 }
 
-export function Profile({ admin, onUpdateName }: ProfileProps) {
+export function Profile({ admin, onUpdateProfile }: ProfileProps) {
   const [name, setName] = useState(admin.userName);
+  const [profileImage, setProfileImage] = useState(admin.profileImage);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = (reader.result as string).split(',')[1];
+        try {
+          const imageUrl = await apiService.uploadProfileImage(admin.rowId, base64, file.name, file.type);
+          setProfileImage(imageUrl);
+        } catch (err) {
+          console.error('Upload failed:', err);
+          alert('ছবি আপলোড করতে ব্যর্থ হয়েছে!');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) return;
     setIsSaving(true);
     try {
-      await onUpdateName(name);
+      await onUpdateProfile(name, profileImage);
     } finally {
       setIsSaving(false);
     }
@@ -25,8 +46,23 @@ export function Profile({ admin, onUpdateName }: ProfileProps) {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center gap-4 mb-8">
-          <div className="p-4 bg-blue-50 rounded-2xl text-blue-600">
-            <UserCircle size={48} />
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center border-2 border-slate-200">
+              {profileImage ? (
+                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-400">
+                  <UserCircle size={48} />
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
+            >
+              <Camera size={16} />
+            </button>
+            <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
           </div>
           <div>
             <h2 className="text-2xl font-bold text-slate-900">User Profile</h2>
@@ -69,7 +105,7 @@ export function Profile({ admin, onUpdateName }: ProfileProps) {
           <div className="pt-4">
             <button
               onClick={handleSave}
-              disabled={isSaving || name === admin.userName}
+              disabled={isSaving || (name === admin.userName && profileImage === admin.profileImage)}
               className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {isSaving ? (

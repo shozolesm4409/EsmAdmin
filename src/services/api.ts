@@ -130,18 +130,34 @@ export const apiService = {
     if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_SCRIPT_ID')) return;
     await fetch(SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'addAdminUser', data: { ...data, role: data.role || 'User', accessSidebar: data.accessSidebar || 'Dashboard' } }),
+      body: JSON.stringify({ action: 'addAdminUser', data: { ...data, role: data.role || 'User', accessSidebar: data.accessSidebar || 'Dashboard', profileImage: data.profileImage || '' } }),
       headers: { 'Content-Type': 'text/plain;charset=utf-8' }
     });
   },
 
-  async updateAdminUserAccess(rowId: number, role: string, accessSidebar: string, userName: string): Promise<void> {
+  async updateAdminUserAccess(rowId: number, role: string, accessSidebar: string, userName: string, profileImage?: string): Promise<void> {
     if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_SCRIPT_ID')) return;
     await fetch(SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'updateAdminUserAccess', rowId, role, accessSidebar, userName }),
+      body: JSON.stringify({ action: 'updateAdminUserAccess', rowId, role, accessSidebar, userName, profileImage }),
       headers: { 'Content-Type': 'text/plain;charset=utf-8' }
     });
+  },
+
+  async uploadProfileImage(rowId: number, base64Data: string, fileName: string, mimeType: string): Promise<string> {
+    if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_SCRIPT_ID')) return '';
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'uploadProfileImage', rowId, base64Data, fileName, mimeType }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      });
+      const data = await response.json();
+      if (data.status === 'success') return data.imageUrl;
+      throw new Error(data.message || 'Upload failed');
+    } catch (error: any) {
+      throw new Error(error.message || 'Network Error');
+    }
   },
 
   async updateAdminUserStatus(rowId: number, status: 'Active' | 'Blocked'): Promise<void> {

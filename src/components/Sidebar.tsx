@@ -9,6 +9,7 @@ interface SidebarProps {
   onViewChange: (view: string) => void;
   userAccess: string;
   onLogout: () => void;
+  profileImage?: string;
 }
 
 const navItems = [
@@ -21,7 +22,7 @@ const navItems = [
   { icon: Settings, label: 'Settings', id: 'settings' },
 ];
 
-export function Sidebar({ isOpen, setIsOpen, currentView, onViewChange, userAccess, onLogout }: SidebarProps) {
+export function Sidebar({ isOpen, setIsOpen, currentView, onViewChange, userAccess, onLogout, profileImage }: SidebarProps) {
   const filteredNavItems = navItems.filter(item => {
     if (userAccess === 'Full') return true;
     const allowedItems = userAccess.split(',').map(i => i.trim().toLowerCase());
@@ -74,7 +75,11 @@ export function Sidebar({ isOpen, setIsOpen, currentView, onViewChange, userAcce
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               )}
             >
-              <item.icon size={20} />
+              {item.id === 'profile' && profileImage ? (
+                <img src={profileImage} className="w-5 h-5 rounded-full object-cover" />
+              ) : (
+                <item.icon size={20} />
+              )}
               <span className="font-medium">{item.label}</span>
             </button>
           ))}
@@ -88,7 +93,7 @@ export function Sidebar({ isOpen, setIsOpen, currentView, onViewChange, userAcce
             <LogOut size={20} />
             <span className="font-medium">Logout</span>
           </button>
-          <span className="text-xs text-slate-500 font-medium px-2">Version: 2.7</span>
+          <span className="text-xs text-slate-500 font-medium px-2">Version: 2.9</span>
         </div>
       </aside>
     </>

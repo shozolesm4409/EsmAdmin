@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AdminUserRecord } from '../types';
-import { Search, Plus, Shield, ShieldOff, UserPlus, Settings } from 'lucide-react';
+import { Search, Plus, Shield, ShieldOff, UserPlus, Settings, Eye } from 'lucide-react';
 import { AccessConfigurator } from './AccessConfigurator';
 
 interface AdminUserTableProps {
@@ -91,6 +91,15 @@ export function AdminUserTable({ users, onAdd, onToggleStatus, onUpdateAccess }:
                 </td>
                 <td className="px-6 py-1 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    <button 
+                      onClick={() => {
+                        // TODO: Implement view details for Admin User
+                      }}
+                      className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                      title="View Details"
+                    >
+                      <Eye size={16} />
+                    </button>
                     <button 
                       onClick={() => {
                         setEditingAccess(user);

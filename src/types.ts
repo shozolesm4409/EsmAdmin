@@ -54,4 +54,5 @@ export interface AdminUserRecord {
   status: 'Active' | 'Blocked';
   role: string;
   accessSidebar: string;
+  profileImage?: string;
 }
